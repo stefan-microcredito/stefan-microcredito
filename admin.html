@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stefan Microcrédito, EI — Painel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --dark: #0D0D0D;
+    --dark-2: #161616;
+    --dark-3: #1E1E1E;
+    --dark-4: #2A2A2A;
+    --text: #F0EDE8;
+    --text-muted: #9A9590;
+    --accent: #4CAF84;
+    --warning: #E8A84C;
+    --error: #E05A5A;
+    --blue: #4C8FE8;
+    --border: rgba(201,168,76,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background:
+      radial-gradient(ellipse 70% 60% at 20% 30%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 70% at 80% 70%, rgba(76,175,132,0.04) 0%, transparent 60%),
+      var(--dark);
+  }
+
+  .login-card {
+    background: var(--dark-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  }
+
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .login-mark {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: var(--dark);
+  }
+
+  .login-brand { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+  .login-brand span { color: var(--gold); }
+  .login-brand small { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; letter-spacing: 0.06em; }
+
+  .login-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .login-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.8rem; }
+
+  .lfield { margin-bottom: 1.1rem; }
+  .lfield label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.45rem; }
+
+  .lfield input {
+    width: 100%;
+    background: var(--dark-3);
+    border: 1px solid var(--dark-4);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .lfield input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+
+  .login-err { font-size: 0.78rem; color: var(--error); margin-bottom: 1rem; display: none; padding: 0.6rem 0.9rem; background: rgba(224,90,90,0.08); border-radius: 8px; border: 1px solid rgba(224,90,90,0.2); }
+
+  .btn-login {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--dark);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.3); }
+
+  .login-hint { font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-top: 1rem; }
+
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 240px;
+    background: var(--dark-2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    padding: 1.5rem 0;
+  }
+
+  .sb-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .sb-mark {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1rem;
+    color: var(--dark);
+    flex-shrink: 0;
+  }
+
+  .sb-name { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
+  .sb-name span { color: var(--gold); }
+  .sb-name small { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.65rem; color: var(--text-muted); font-weight: 400; }
+
+  .sb-nav { flex: 1; padding: 0 0.75rem; }
+
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.2rem;
+  }
+
+  .sb-item:hover { background: var(--dark-3); color: var(--text); }
+  .sb-item.active { background: rgba(201,168,76,0.1); color: var(--gold); }
+  .sb-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  .sb-footer {
+    padding: 1rem 1.5rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-logout {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1px solid var(--dark-4);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-logout:hover { border-color: var(--error); color: var(--error); }
+
+  /* Main content */
+  .main {
+    margin-left: 240px;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .page-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; }
+  .page-date { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* Stats cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--dark-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.c1::after { background: var(--gold); }
+  .stat-card.c2::after { background: var(--warning); }
+  .stat-card.c3::after { background: var(--accent); }
+  .stat-card.c4::after { background: var(--error); }
+
+  .stat-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.6rem; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 0.3rem; }
+  .stat-sub { font-size: 0.72rem; color: var(--text-muted); }
+
+  .stat-card.c1 .stat-value { color: var(--gold); }
+  .stat-card.c2 .stat-value { color: var(--warning); }
+  .stat-card.c3 .stat-value { color: var(--accent); }
+  .stat-card.c4 .stat-value { color: var(--error); }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar input[type="text"] {
+    background: var(--dark-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    width: 240px;
+    transition: border-color 0.2s;
+  }
+
+  .filter-bar input:focus { border-color: var(--gold); }
+
+  .filter-btn {
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--dark-2);
+    color: var(--text-muted);
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .filter-btn:hover { color: var(--text); border-color: var(--text-muted); }
+  .filter-btn.active { background: rgba(201,168,76,0.12); border-color: var(--gold); color: var(--gold); }
+
+  /* Table */
+  .table-wrap {
+    background: var(--dark-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr { border-bottom: 1px solid var(--border); }
+
+  th {
+    padding: 0.85rem 1.2rem;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+
+  tbody tr:last-child { border: none; }
+  tbody tr:hover { background: rgba(201,168,76,0.04); }
+
+  td {
+    padding: 0.9rem 1.2rem;
+    font-size: 0.85rem;
+  }
+
+  .td-ref { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+  .td-name { font-weight: 600; }
+  .td-amount { font-weight: 700; color: var(--gold); }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+
+  .badge-pendente { background: rgba(232,168,76,0.12); color: var(--warning); }
+  .badge-pendente::before { background: var(--warning); }
+  .badge-aprovado { background: rgba(76,175,132,0.12); color: var(--accent); }
+  .badge-aprovado::before { background: var(--accent); }
+  .badge-recusado { background: rgba(224,90,90,0.12); color: var(--error); }
+  .badge-recusado::before { background: var(--error); }
+  .badge-analise { background: rgba(76,143,232,0.12); color: var(--blue); }
+  .badge-analise::before { background: var(--blue); }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.85rem; }
+  .empty-state .ei { font-size: 2rem; margin-bottom: 0.75rem; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+
+  .modal {
+    background: var(--dark-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .modal-header {
+    padding: 1.5rem 1.8rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--dark-2);
+    z-index: 10;
+  }
+
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; }
+  .modal-ref { font-size: 0.72rem; color: var(--gold); margin-top: 0.2rem; }
+
+  .btn-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--dark-3);
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: grid;
+    place-items: center;
+  }
+
+  .btn-close:hover { background: var(--dark-4); color: var(--text); }
+
+  .modal-body { padding: 1.5rem 1.8rem; }
+
+  .modal-section { margin-bottom: 1.4rem; }
+  .modal-section-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+
+  .detail-item { }
+  .detail-item.full { grid-column: 1 / -1; }
+  .detail-key { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.2rem; font-weight: 500; }
+  .detail-val { font-size: 0.88rem; font-weight: 600; }
+  .detail-val.big { font-size: 1.2rem; color: var(--gold); font-family: 'Playfair Display', serif; }
+
+  .modal-footer {
+    padding: 1.2rem 1.8rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-status {
+    flex: 1;
+    padding: 0.65rem;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-aprovar { background: rgba(76,175,132,0.15); color: var(--accent); border: 1px solid rgba(76,175,132,0.3); }
+  .btn-aprovar:hover { background: var(--accent); color: var(--dark); }
+  .btn-analise { background: rgba(76,143,232,0.1); color: var(--blue); border: 1px solid rgba(76,143,232,0.3); }
+  .btn-analise:hover { background: var(--blue); color: white; }
+  .btn-recusar { background: rgba(224,90,90,0.1); color: var(--error); border: 1px solid rgba(224,90,90,0.3); }
+  .btn-recusar:hover { background: var(--error); color: white; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .sidebar { width: 200px; }
+    .main { margin-left: 200px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 650px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1rem; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(5), td:nth-child(5) { display: none; }
+  }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-mark">S</div>
+      <div class="login-brand">Stefan <span>Microcrédito</span><small>EI — Área Administrativa</small></div>
+    </div>
+    <div class="login-title">Bem-vindo</div>
+    <div class="login-sub">Acesso restrito. Insira as suas credenciais.</div>
+
+    <div class="login-err" id="loginErr">Utilizador ou password incorrectos.</div>
+
+    <div class="lfield">
+      <label>Utilizador</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="username" />
+    </div>
+    <div class="lfield">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn-login" onclick="doLogin()">Entrar no Painel</button>
+
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-mark">S</div>
+      <div class="sb-name">Stefan <span>Microcrédito</span><small>EI — Admin</small></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-item active"><span class="icon">📋</span> Pedidos</div>
+      <div class="sb-item" style="opacity:0.4;cursor:default"><span class="icon">📊</span> Relatórios</div>
+      <div class="sb-item" style="opacity:0.4;cursor:default"><span class="icon">👥</span> Clientes</div>
+      <div class="sb-item" style="opacity:0.4;cursor:default"><span class="icon">⚙️</span> Definições</div>
+    </nav>
+    <div class="sb-footer">
+      <button class="btn-logout" onclick="openChangePass()" style="margin-bottom:.5rem;border-color:var(--border);color:var(--text-muted)">🔑 Alterar Password</button>
+      <button class="btn-logout" onclick="doLogout()">🚪 Sair</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Pedidos de Financiamento</div>
+        <div class="page-date" id="topDate"></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card c1">
+        <div class="stat-label">Total de Pedidos</div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-sub">Todos os registos</div>
+      </div>
+      <div class="stat-card c2">
+        <div class="stat-label">Pendentes</div>
+        <div class="stat-value" id="statPendente">0</div>
+        <div class="stat-sub">Aguardam análise</div>
+      </div>
+      <div class="stat-card c3">
+        <div class="stat-label">Aprovados</div>
+        <div class="stat-value" id="statAprovado">0</div>
+        <div class="stat-sub">Prontos para desembolso</div>
+      </div>
+      <div class="stat-card c4">
+        <div class="stat-label">Recusados</div>
+        <div class="stat-value" id="statRecusado">0</div>
+        <div class="stat-sub">Não elegíveis</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍  Pesquisar por nome, BI ou referência..." oninput="renderTable()" />
+      <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="setFilter('pendente',this)">Pendente</button>
+      <button class="filter-btn" onclick="setFilter('analise',this)">Em Análise</button>
+      <button class="filter-btn" onclick="setFilter('aprovado',this)">Aprovado</button>
+      <button class="filter-btn" onclick="setFilter('recusado',this)">Recusado</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Referência</th>
+            <th>Nome do Cliente</th>
+            <th>Localização</th>
+            <th>Valor (MT)</th>
+            <th>Prazo</th>
+            <th>Finalidade</th>
+            <th>Estado</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="ei">📭</div>
+        Nenhum pedido encontrado.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL DETALHE ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="mTitle">—</div>
+        <div class="modal-ref" id="mRef">—</div>
+      </div>
+      <button class="btn-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">Dados Pessoais</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-key">Nome Completo</div><div class="detail-val" id="mNome">—</div></div>
+          <div class="detail-item"><div class="detail-key">BI / NUIT</div><div class="detail-val" id="mBi">—</div></div>
+          <div class="detail-item"><div class="detail-key">Telemóvel</div><div class="detail-val" id="mTel">—</div></div>
+          <div class="detail-item"><div class="detail-key">Email</div><div class="detail-val" id="mEmail">—</div></div>
+          <div class="detail-item"><div class="detail-key">Data de Nascimento</div><div class="detail-val" id="mNasc">—</div></div>
+          <div class="detail-item"><div class="detail-key">Género</div><div class="detail-val" id="mGenero">—</div></div>
+          <div class="detail-item full"><div class="detail-key">Endereço</div><div class="detail-val" id="mEndereco">—</div></div>
+          <div class="detail-item"><div class="detail-key">Cidade / Província</div><div class="detail-val" id="mCidade">—</div></div>
+          <div class="detail-item"><div class="detail-key">Estado Civil</div><div class="detail-val" id="mEstado">—</div></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Dados do Financiamento</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-key">Valor Solicitado</div><div class="detail-val big" id="mValor">—</div></div>
+          <div class="detail-item"><div class="detail-key">Prazo</div><div class="detail-val big" id="mPrazo">—</div></div>
+          <div class="detail-item full"><div class="detail-key">Finalidade</div><div class="detail-val" id="mFinalidade">—</div></div>
+          <div class="detail-item"><div class="detail-key">Rendimento Mensal</div><div class="detail-val" id="mRendimento">—</div></div>
+          <div class="detail-item"><div class="detail-key">Situação Laboral</div><div class="detail-val" id="mSituacao">—</div></div>
+          <div class="detail-item full"><div class="detail-key">Fiador</div><div class="detail-val" id="mFiador">—</div></div>
+          <div class="detail-item full"><div class="detail-key">Descrição da Actividade</div><div class="detail-val" id="mDescricao" style="line-height:1.6;color:var(--text-muted)">—</div></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Estado do Pedido</div>
+        <div id="mBadgeWrap"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-status btn-aprovar" onclick="changeStatus('aprovado')">✓ Aprovar</button>
+      <button class="btn-status btn-analise" onclick="changeStatus('analise')">🔍 Em Análise</button>
+      <button class="btn-status btn-recusar" onclick="changeStatus('recusado')">✕ Recusar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── AUTH ──
+// Default credentials stored in localStorage (changeable by user)
+function getCreds() {
+  return {
+    user: localStorage.getItem('sm_user') || 'admin',
+    pass: localStorage.getItem('sm_pass') || 'stefan2026'
+  };
+}
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  const creds = getCreds();
+  if (u === creds.user && p === creds.pass) {
+    err.style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    init();
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+function openChangePass() {
+  document.getElementById('changePwModal').style.display = 'flex';
+}
+
+function closeChangePass() {
+  document.getElementById('changePwModal').style.display = 'none';
+  document.getElementById('cpErr').style.display = 'none';
+  document.getElementById('cpOk').style.display = 'none';
+  document.getElementById('cp-user').value = '';
+  document.getElementById('cp-passAtual').value = '';
+  document.getElementById('cp-passNova').value = '';
+  document.getElementById('cp-passConf').value = '';
+}
+
+function saveChangePass() {
+  const novoUser  = document.getElementById('cp-user').value.trim();
+  const passAtual = document.getElementById('cp-passAtual').value;
+  const passNova  = document.getElementById('cp-passNova').value;
+  const passConf  = document.getElementById('cp-passConf').value;
+  const err = document.getElementById('cpErr');
+  const ok  = document.getElementById('cpOk');
+  const creds = getCreds();
+
+  err.style.display = 'none';
+  ok.style.display = 'none';
+
+  if (passAtual !== creds.pass) { err.textContent = 'Password actual incorrecta.'; err.style.display = 'block'; return; }
+  if (passNova.length < 6)      { err.textContent = 'A nova password deve ter pelo menos 6 caracteres.'; err.style.display = 'block'; return; }
+  if (passNova !== passConf)    { err.textContent = 'As passwords novas não coincidem.'; err.style.display = 'block'; return; }
+
+  if (novoUser) localStorage.setItem('sm_user', novoUser);
+  localStorage.setItem('sm_pass', passNova);
+
+  ok.style.display = 'block';
+  setTimeout(closeChangePass, 1500);
+}
+
+// ── SUPABASE CONFIG ──
+const SUPABASE_URL = 'https://izawbzjoqbdgnyiipwrj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6W_mAvBU9RRhq6mBSRle0Q_oleFyW7d';
+
+let pedidos = [];
+
+async function fetchPedidos() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  empty.innerHTML = '<div class="ei">⏳</div>A carregar pedidos...';
+  empty.style.display = 'block';
+  tbody.innerHTML = '';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/pedidos?order=criado_em.desc', {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    pedidos = data.map(p => ({
+      ref: p.ref,
+      nome: p.nome,
+      bi: p.bi,
+      tel: p.telemovel,
+      email: p.email || '',
+      nasc: p.nascimento,
+      genero: p.genero,
+      endereco: p.endereco,
+      cidade: p.cidade,
+      estado: p.estado_civil || '',
+      valor: p.valor,
+      prazo: p.prazo,
+      finalidade: p.finalidade,
+      descricao: p.descricao,
+      rendimento: p.rendimento,
+      situacao: p.situacao,
+      fiador: p.fiador || '',
+      status: p.status,
+      data: p.criado_em ? p.criado_em.split('T')[0] : '',
+      db_ref: p.ref,
+    }));
+    updateStats();
+    renderTable();
+  } catch(e) {
+    empty.innerHTML = '<div class="ei">⚠️</div>Erro ao carregar pedidos: ' + e.message;
+    empty.style.display = 'block';
+  }
+}
+
+let currentFilter = 'todos';
+let currentRef = null;
+
+function fmt(n) {
+  return parseFloat(n).toLocaleString('pt-MZ', { minimumFractionDigits: 2 });
+}
+
+function badgeHTML(status) {
+  const map = {
+    pendente: ['badge-pendente','Pendente'],
+    analise:  ['badge-analise','Em Análise'],
+    aprovado: ['badge-aprovado','Aprovado'],
+    recusado: ['badge-recusado','Recusado'],
+  };
+  const [cls, label] = map[status] || ['badge-pendente','Desconhecido'];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent    = pedidos.length;
+  document.getElementById('statPendente').textContent = pedidos.filter(p=>p.status==='pendente').length;
+  document.getElementById('statAprovado').textContent = pedidos.filter(p=>p.status==='aprovado').length;
+  document.getElementById('statRecusado').textContent = pedidos.filter(p=>p.status==='recusado').length;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let list = pedidos.filter(p => {
+    const matchFilter = currentFilter === 'todos' || p.status === currentFilter;
+    const matchSearch = !q || p.nome.toLowerCase().includes(q) || p.bi.includes(q) || p.ref.toLowerCase().includes(q);
+    return matchFilter && matchSearch;
+  });
+
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+
+  if (list.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(p => `
+    <tr onclick="openModal('${p.ref}')">
+      <td class="td-ref">${p.ref}</td>
+      <td class="td-name">${p.nome}</td>
+      <td>${p.cidade}</td>
+      <td class="td-amount">MT ${fmt(p.valor)}</td>
+      <td>${p.prazo} meses</td>
+      <td>${p.finalidade}</td>
+      <td>${badgeHTML(p.status)}</td>
+      <td style="color:var(--text-muted);font-size:0.78rem">${p.data}</td>
+    </tr>
+  `).join('');
+}
+
+function openModal(ref) {
+  const p = pedidos.find(x => x.ref === ref);
+  if (!p) return;
+  currentRef = ref;
+
+  document.getElementById('mTitle').textContent   = p.nome;
+  document.getElementById('mRef').textContent      = p.ref;
+  document.getElementById('mNome').textContent     = p.nome;
+  document.getElementById('mBi').textContent       = p.bi;
+  document.getElementById('mTel').textContent      = p.tel;
+  document.getElementById('mEmail').textContent    = p.email || '—';
+  document.getElementById('mNasc').textContent     = p.nasc;
+  document.getElementById('mGenero').textContent   = p.genero;
+  document.getElementById('mEndereco').textContent = p.endereco;
+  document.getElementById('mCidade').textContent   = p.cidade;
+  document.getElementById('mEstado').textContent   = p.estado || '—';
+  document.getElementById('mValor').textContent    = 'MT ' + fmt(p.valor);
+  document.getElementById('mPrazo').textContent    = p.prazo + ' meses';
+  document.getElementById('mFinalidade').textContent = p.finalidade;
+  document.getElementById('mRendimento').textContent = 'MT ' + fmt(p.rendimento);
+  document.getElementById('mSituacao').textContent = p.situacao;
+  document.getElementById('mFiador').textContent   = p.fiador || '—';
+  document.getElementById('mDescricao').textContent = p.descricao;
+  document.getElementById('mBadgeWrap').innerHTML  = badgeHTML(p.status);
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  currentRef = null;
+}
+
+async function changeStatus(newStatus) {
+  if (!currentRef) return;
+  const p = pedidos.find(x => x.ref === currentRef);
+  if (!p) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/pedidos?ref=eq.' + encodeURIComponent(p.ref), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    p.status = newStatus;
+    document.getElementById('mBadgeWrap').innerHTML = badgeHTML(newStatus);
+    updateStats();
+    renderTable();
+  } catch(e) {
+    alert('Erro ao actualizar estado: ' + e.message);
+  }
+}
+
+function init() {
+  const now = new Date();
+  document.getElementById('topDate').textContent = now.toLocaleDateString('pt-MZ', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  fetchPedidos();
+}
+</script>
+<!-- ── CHANGE PASSWORD MODAL ── -->
+<div id="changePwModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:300;align-items:center;justify-content:center;padding:1.5rem">
+  <div style="background:var(--dark-2);border:1px solid var(--border);border-radius:18px;width:100%;max-width:420px;overflow:hidden;position:relative">
+    <div style="padding:1.3rem 1.6rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:Playfair Display,serif;font-size:1.1rem;font-weight:700">Alterar Credenciais</div>
+      <button onclick="closeChangePass()" style="width:30px;height:30px;border-radius:7px;background:var(--dark-3);border:none;color:var(--text-muted);font-size:.9rem;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:1.4rem 1.6rem">
+      <div style="display:none;font-size:.78rem;color:var(--error);padding:.5rem .8rem;background:rgba(224,90,90,.09);border-left:3px solid var(--error);border-radius:5px;margin-bottom:1rem" id="cpErr"></div>
+      <div style="display:none;font-size:.78rem;color:var(--accent);padding:.5rem .8rem;background:rgba(76,175,132,.09);border-left:3px solid var(--accent);border-radius:5px;margin-bottom:1rem" id="cpOk">✓ Credenciais actualizadas com sucesso!</div>
+      <div style="margin-bottom:.9rem">
+        <label style="display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem">Novo Utilizador (deixe em branco para manter)</label>
+        <input id="cp-user" type="text" placeholder="ex: stefan" style="width:100%;background:var(--dark-3);border:1.5px solid var(--dark-4);border-radius:8px;padding:.7rem .9rem;color:var(--text);font-family:DM Sans,sans-serif;font-size:.87rem;outline:none">
+      </div>
+      <div style="margin-bottom:.9rem">
+        <label style="display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem">Password Actual <span style="color:var(--gold)">*</span></label>
+        <input id="cp-passAtual" type="password" placeholder="••••••••" style="width:100%;background:var(--dark-3);border:1.5px solid var(--dark-4);border-radius:8px;padding:.7rem .9rem;color:var(--text);font-family:DM Sans,sans-serif;font-size:.87rem;outline:none">
+      </div>
+      <div style="margin-bottom:.9rem">
+        <label style="display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem">Nova Password <span style="color:var(--gold)">*</span></label>
+        <input id="cp-passNova" type="password" placeholder="mínimo 6 caracteres" style="width:100%;background:var(--dark-3);border:1.5px solid var(--dark-4);border-radius:8px;padding:.7rem .9rem;color:var(--text);font-family:DM Sans,sans-serif;font-size:.87rem;outline:none">
+      </div>
+      <div style="margin-bottom:1.2rem">
+        <label style="display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem">Confirmar Nova Password <span style="color:var(--gold)">*</span></label>
+        <input id="cp-passConf" type="password" placeholder="repita a nova password" style="width:100%;background:var(--dark-3);border:1.5px solid var(--dark-4);border-radius:8px;padding:.7rem .9rem;color:var(--text);font-family:DM Sans,sans-serif;font-size:.87rem;outline:none">
+      </div>
+      <div style="display:flex;gap:.7rem">
+        <button onclick="closeChangePass()" style="flex:1;padding:.7rem;background:transparent;border:1px solid var(--dark-4);border-radius:8px;color:var(--text-muted);font-family:DM Sans,sans-serif;font-size:.85rem;cursor:pointer">Cancelar</button>
+        <button onclick="saveChangePass()" style="flex:1;padding:.7rem;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;border-radius:8px;color:var(--dark);font-family:DM Sans,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
